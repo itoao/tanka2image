@@ -107,18 +107,24 @@ export default function ExportPage() {
     try {
       // Create canvas directly for better control over vertical text rendering
       const canvas = document.createElement('canvas');
-      canvas.width = settings.width;
-      canvas.height = settings.height;
-      const ctx = canvas.getContext('2d');
+      const scale = 2; // Use 2x scale for better quality
+      canvas.width = settings.width * scale;
+      canvas.height = settings.height * scale;
+      canvas.style.width = `${settings.width}px`;
+      canvas.style.height = `${settings.height}px`;
       
+      const ctx = canvas.getContext('2d');
       if (!ctx) return;
+      
+      // Apply scale for better quality
+      ctx.scale(scale, scale);
 
       // Fill background
       ctx.fillStyle = settings.bgColor;
       ctx.fillRect(0, 0, settings.width, settings.height);
 
-      // Set font properties
-      const fontFamily = settings.fontFamily === 'mincho' ? 'serif' : 'sans-serif';
+      // Set font properties - matching preview exactly
+      const fontFamily = settings.fontFamily === 'mincho' ? 'Noto Serif JP, serif' : 'Noto Sans JP, sans-serif';
       ctx.font = `${settings.fontSize}px ${fontFamily}`;
       ctx.fillStyle = settings.textColor;
       ctx.textAlign = 'center';
@@ -197,12 +203,14 @@ export default function ExportPage() {
     const lineSpacing = settings.fontSize * 1.8;
     const charSpacing = settings.fontSize * 1.2;
     
-    // Calculate starting position (centered)
-    const totalWidth = lines.length * lineSpacing;
-    let currentX = (settings.width + totalWidth) / 2 - lineSpacing / 2;
+    // Match preview layout calculation exactly
+    const totalLines = lines.length;
+    let currentX = (settings.width / 2) + ((totalLines - 1) * lineSpacing / 2);
     
     for (const line of lines) {
-      let currentY = (settings.height - line.length * charSpacing) / 2 + charSpacing / 2;
+      // Center each line vertically
+      const lineHeight = line.length * charSpacing;
+      let currentY = (settings.height / 2) - (lineHeight / 2) + (charSpacing / 2);
       
       for (const char of line) {
         // Special handling for punctuation and long vowel marks
@@ -225,9 +233,9 @@ export default function ExportPage() {
     const lines = text.split('\n').filter(line => line.trim());
     const lineHeight = settings.fontSize * 1.6;
     
-    // Calculate starting position (centered)
-    const totalHeight = lines.length * lineHeight;
-    let currentY = (settings.height - totalHeight) / 2 + settings.fontSize;
+    // Match preview layout calculation exactly
+    const totalHeight = (lines.length - 1) * lineHeight + settings.fontSize;
+    let currentY = (settings.height / 2) - (totalHeight / 2) + (settings.fontSize / 2);
     
     for (const line of lines) {
       ctx.fillText(line, settings.width / 2, currentY);
@@ -603,20 +611,20 @@ export default function ExportPage() {
               <h3 className="text-lg font-medium mb-4">画像をダウンロード</h3>
               <div className="space-y-3">
                 <button
-                  onClick={() => {}}
-                  disabled={true}
-                  className="w-full flex items-center justify-center px-4 py-3 bg-gray-400 text-white rounded-md cursor-not-allowed"
+                  onClick={() => handleExport('png')}
+                  disabled={!isContentValid}
+                  className="w-full flex items-center justify-center px-4 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
                 >
                   <Download className="w-4 h-4 mr-2" />
-                  PNG形式でダウンロード（実装中）
+                  PNG形式でダウンロード
                 </button>
                 <button
-                  onClick={() => {}}
-                  disabled={true}
-                  className="w-full flex items-center justify-center px-4 py-3 bg-gray-400 text-white rounded-md cursor-not-allowed"
+                  onClick={() => handleExport('jpeg')}
+                  disabled={!isContentValid}
+                  className="w-full flex items-center justify-center px-4 py-3 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
                 >
                   <Download className="w-4 h-4 mr-2" />
-                  JPEG形式でダウンロード（実装中）
+                  JPEG形式でダウンロード
                 </button>
                 
                 <button
@@ -1008,20 +1016,20 @@ export default function ExportPage() {
               <div className="space-y-4">
                 <div className="flex space-x-4">
                   <button
-                    onClick={() => {}}
-                    disabled={true}
-                    className="flex items-center px-4 py-2 bg-gray-400 text-white rounded-md cursor-not-allowed"
+                    onClick={() => handleExport('png')}
+                    disabled={!isContentValid}
+                    className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
                   >
                     <Download className="w-4 h-4 mr-2" />
-                    PNG形式（実装中）
+                    PNG形式
                   </button>
                   <button
-                    onClick={() => {}}
-                    disabled={true}
-                    className="flex items-center px-4 py-2 bg-gray-400 text-white rounded-md cursor-not-allowed"
+                    onClick={() => handleExport('jpeg')}
+                    disabled={!isContentValid}
+                    className="flex items-center px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
                   >
                     <Download className="w-4 h-4 mr-2" />
-                    JPEG形式（実装中）
+                    JPEG形式
                   </button>
                 </div>
                 
