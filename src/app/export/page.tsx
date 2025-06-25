@@ -37,12 +37,61 @@ export default function ExportPage() {
     if (!previewRef.current) return;
 
     try {
-      const canvas = await html2canvas(previewRef.current, {
+      // Create a temporary element with simplified styles for html2canvas
+      const tempElement = previewRef.current.cloneNode(true) as HTMLElement;
+      
+      // Remove problematic Tailwind classes and apply inline styles
+      tempElement.className = '';
+      tempElement.style.cssText = `
+        width: ${settings.width}px;
+        height: ${settings.height}px;
+        background-color: ${settings.bgColor};
+        color: ${settings.textColor};
+        font-size: ${settings.fontSize}px;
+        font-family: ${settings.fontFamily === 'mincho' ? 'serif' : 'sans-serif'};
+        line-height: ${settings.style === 'VERTICAL' ? '1.8' : '1.6'};
+        padding: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-sizing: border-box;
+        ${settings.style === 'VERTICAL' ? 'writing-mode: vertical-rl; text-orientation: upright;' : ''}
+      `;
+      
+      // Clean up child elements
+      const children = tempElement.querySelectorAll('*');
+      children.forEach(child => {
+        const element = child as HTMLElement;
+        element.className = '';
+        
+        if (element.style.opacity) {
+          element.style.opacity = '0.7';
+        }
+        
+        // Apply margin for line spacing
+        if (element.tagName === 'DIV') {
+          const marginStyle = settings.style === 'VERTICAL' ? 'margin-bottom: 16px;' : 'margin-bottom: 8px;';
+          element.style.cssText = marginStyle + element.style.cssText;
+        }
+      });
+      
+      // Temporarily add to document for rendering
+      tempElement.style.position = 'absolute';
+      tempElement.style.left = '-9999px';
+      tempElement.style.top = '-9999px';
+      document.body.appendChild(tempElement);
+
+      const canvas = await html2canvas(tempElement, {
         width: settings.width,
         height: settings.height,
         scale: 2,
         backgroundColor: settings.bgColor,
+        useCORS: true,
+        allowTaint: true,
       });
+
+      // Remove temporary element
+      document.body.removeChild(tempElement);
 
       const link = document.createElement('a');
       link.download = `tanka_${Date.now()}.${format}`;
