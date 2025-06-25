@@ -1,103 +1,136 @@
-import Image from "next/image";
+'use client';
+
+import Link from 'next/link';
+import { GlassCard } from '../components/ui/GlassCard';
+import { GlassButton } from '../components/ui/GlassButton';
+import { Edit, Image, Sparkles } from 'lucide-react';
 
 export default function Home() {
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+    <div className="min-h-screen p-4 lg:p-8">
+      <div className="max-w-4xl mx-auto">
+        {/* ヘロー */}
+        <div className="text-center mb-16">
+          <h1 className="text-5xl font-bold text-[var(--lg-text-primary)] mb-4">
+            <span className="bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+              短歌
+            </span>
+            <span className="text-[var(--lg-text-primary)]">
+              を美しい画像に
+            </span>
+          </h1>
+          <p className="text-xl text-[var(--lg-text-secondary)] mb-8">
+            あなたの短歌を縦長の美しい画像に変換し、SNSでシェアしましょう
+          </p>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+
+        {/* メイン機能カード */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+          <GlassCard hoverable lens className="text-center">
+            <Edit size={48} className="mx-auto mb-4 text-[var(--lg-accent)]" />
+            <h3 className="text-lg font-semibold text-[var(--lg-text-primary)] mb-2">
+              簡単入力
+            </h3>
+            <p className="text-sm text-[var(--lg-text-secondary)]">
+              短歌を入力するだけで自動的に文字数カウント。改行位置も自由に調整できます。
+            </p>
+          </GlassCard>
+
+          <GlassCard hoverable lens className="text-center">
+            <Sparkles size={48} className="mx-auto mb-4 text-[var(--lg-accent)]" />
+            <h3 className="text-lg font-semibold text-[var(--lg-text-primary)] mb-2">
+              豊富なカスタマイズ
+            </h3>
+            <p className="text-sm text-[var(--lg-text-secondary)]">
+              縦書き・横書き、フォント、色設定など、お好みに合わせて画像をカスタマイズ。
+            </p>
+          </GlassCard>
+
+          <GlassCard hoverable lens className="text-center">
+            <Image size={48} className="mx-auto mb-4 text-[var(--lg-accent)]" />
+            <h3 className="text-lg font-semibold text-[var(--lg-text-primary)] mb-2">
+              高品質エクスポート
+            </h3>
+            <p className="text-sm text-[var(--lg-text-secondary)]">
+              PNG・JPEG形式で高品質な画像を生成。X（旧Twitter）での投稿に最適化。
+            </p>
+          </GlassCard>
+        </div>
+
+        {/* CTA */}
+        <div className="text-center">
+          <GlassCard className="inline-block">
+            <div className="text-center">
+              <h2 className="text-2xl font-bold text-[var(--lg-text-primary)] mb-4">
+                今すぐ始めよう
+              </h2>
+              <p className="text-[var(--lg-text-secondary)] mb-6">
+                美しい短歌画像を作成して、あなたの想いを世界に発信しましょう
+              </p>
+              <Link href="/export">
+                <GlassButton size="lg" className="px-12">
+                  短歌画像を作成する
+                </GlassButton>
+              </Link>
+            </div>
+          </GlassCard>
+        </div>
+
+        {/* 使い方 */}
+        <div className="mt-16">
+          <GlassCard>
+            <h2 className="text-2xl font-bold text-[var(--lg-text-primary)] mb-6 text-center">
+              使い方
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+              <div className="text-center">
+                <div className="w-12 h-12 rounded-full bg-[var(--lg-accent)] text-white flex items-center justify-center mx-auto mb-3 font-bold">
+                  1
+                </div>
+                <h3 className="font-semibold text-[var(--lg-text-primary)] mb-2">
+                  短歌を入力
+                </h3>
+                <p className="text-sm text-[var(--lg-text-secondary)]">
+                  31文字程度の短歌を入力します
+                </p>
+              </div>
+              <div className="text-center">
+                <div className="w-12 h-12 rounded-full bg-[var(--lg-accent)] text-white flex items-center justify-center mx-auto mb-3 font-bold">
+                  2
+                </div>
+                <h3 className="font-semibold text-[var(--lg-text-primary)] mb-2">
+                  スタイル設定
+                </h3>
+                <p className="text-sm text-[var(--lg-text-secondary)]">
+                  フォント・色・レイアウトを選択
+                </p>
+              </div>
+              <div className="text-center">
+                <div className="w-12 h-12 rounded-full bg-[var(--lg-accent)] text-white flex items-center justify-center mx-auto mb-3 font-bold">
+                  3
+                </div>
+                <h3 className="font-semibold text-[var(--lg-text-primary)] mb-2">
+                  プレビュー
+                </h3>
+                <p className="text-sm text-[var(--lg-text-secondary)]">
+                  リアルタイムで仕上がりを確認
+                </p>
+              </div>
+              <div className="text-center">
+                <div className="w-12 h-12 rounded-full bg-[var(--lg-accent)] text-white flex items-center justify-center mx-auto mb-3 font-bold">
+                  4
+                </div>
+                <h3 className="font-semibold text-[var(--lg-text-primary)] mb-2">
+                  エクスポート
+                </h3>
+                <p className="text-sm text-[var(--lg-text-secondary)]">
+                  画像をダウンロード・シェア
+                </p>
+              </div>
+            </div>
+          </GlassCard>
+        </div>
+      </div>
     </div>
   );
 }
