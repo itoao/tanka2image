@@ -6,8 +6,7 @@
       "Bash(mkdir:*)",
       "Bash(pnpm run:*)",
       "Bash(git add:*)",
-      "Bash(git commit:*)",
-      "Bash(terminal-notifier:*)"
+      "Bash(git commit:*)"
     ],
     "deny": []
   }
