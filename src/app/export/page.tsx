@@ -138,20 +138,25 @@ export default function ExportPage() {
         await renderHorizontalText(ctx, content, settings);
       }
 
-      // Render author name and date if specified
+      // Render author name and date if specified (左下に横書き)
       if (authorName || showDate) {
         ctx.font = `${Math.floor(settings.fontSize * 0.6)}px ${fontFamily}`;
         ctx.globalAlpha = 0.7;
+        ctx.textAlign = 'left';
         
-        let infoY = settings.height - 80;
-        if (authorName) {
-          ctx.fillText(authorName, settings.width / 2, infoY);
-          infoY += 30;
-        }
+        const padding = 40;
+        let infoY = settings.height - padding - 20;
+        
         if (showDate) {
-          ctx.fillText(new Date().toLocaleDateString('ja-JP'), settings.width / 2, infoY);
+          ctx.fillText(new Date().toLocaleDateString('ja-JP'), padding, infoY);
+          infoY -= 30;
         }
+        if (authorName) {
+          ctx.fillText(authorName, padding, infoY);
+        }
+        
         ctx.globalAlpha = 1;
+        ctx.textAlign = 'center'; // Reset to center
       }
 
       // Convert to blob for better mobile support
@@ -325,20 +330,25 @@ export default function ExportPage() {
         await renderHorizontalTextForStories(ctx, content, storyFontSize, settings);
       }
 
-      // Render author name and date if specified
+      // Render author name and date if specified (左下に横書き)
       if (authorName || showDate) {
         ctx.font = `${Math.floor(storyFontSize * 0.6)}px ${fontFamily}`;
         ctx.globalAlpha = 0.7;
+        ctx.textAlign = 'left';
         
-        let infoY = 1920 - 120;
-        if (authorName) {
-          ctx.fillText(authorName, 540, infoY);
-          infoY += 40;
-        }
+        const padding = 60;
+        let infoY = 1920 - padding - 30;
+        
         if (showDate) {
-          ctx.fillText(new Date().toLocaleDateString('ja-JP'), 540, infoY);
+          ctx.fillText(new Date().toLocaleDateString('ja-JP'), padding, infoY);
+          infoY -= 45;
         }
+        if (authorName) {
+          ctx.fillText(authorName, padding, infoY);
+        }
+        
         ctx.globalAlpha = 1;
+        ctx.textAlign = 'center'; // Reset to center
       }
 
       // Convert to blob
@@ -752,9 +762,9 @@ export default function ExportPage() {
                 )}
                 
                 {(authorName || showDate) && (
-                  <div className="text-xs opacity-70 mt-4">
-                    {authorName && <div>{authorName}</div>}
+                  <div className="absolute bottom-3 left-3 text-xs opacity-70 text-left">
                     {showDate && <div>{new Date().toLocaleDateString('ja-JP')}</div>}
+                    {authorName && <div>{authorName}</div>}
                   </div>
                 )}
               </div>
@@ -1163,23 +1173,20 @@ export default function ExportPage() {
                   
                   {(authorName || showDate) && (
                     <div 
-                      className={settings.style === 'VERTICAL' ? 'vertical-text' : ''}
                       style={{
+                        position: 'absolute',
+                        bottom: '15px',
+                        left: '15px',
                         fontSize: `${settings.fontSize / 4 * 0.7}px`,
                         opacity: 0.7,
-                        writingMode: settings.style === 'VERTICAL' ? 'vertical-rl' : 'horizontal-tb',
-                        textOrientation: settings.style === 'VERTICAL' ? 'upright' : 'mixed',
+                        writingMode: 'horizontal-tb',
+                        textAlign: 'left',
                       }}
                     >
-                      {authorName && <div>{authorName}</div>}
                       {showDate && (
-                        <div>
-                          {settings.style === 'VERTICAL' 
-                            ? new Date().toLocaleDateString('ja-JP').replace(/\//g, '・')
-                            : new Date().toLocaleDateString('ja-JP')
-                          }
-                        </div>
+                        <div>{new Date().toLocaleDateString('ja-JP')}</div>
                       )}
+                      {authorName && <div>{authorName}</div>}
                     </div>
                   )}
                 </div>
