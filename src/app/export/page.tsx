@@ -50,7 +50,7 @@ export default function ExportPage() {
         font-size: ${settings.fontSize}px;
         font-family: ${settings.fontFamily === 'mincho' ? 'serif' : 'sans-serif'};
         line-height: ${settings.style === 'VERTICAL' ? '1.8' : '1.6'};
-        padding: 40px;
+        padding: 80px;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -64,14 +64,35 @@ export default function ExportPage() {
         const element = child as HTMLElement;
         element.className = '';
         
-        if (element.style.opacity) {
-          element.style.opacity = '0.7';
+        // Main content container
+        if (element.querySelector('div') && !element.classList.contains('signature')) {
+          element.style.cssText = `
+            text-align: center;
+            ${settings.style === 'VERTICAL' ? 'writing-mode: vertical-rl; text-orientation: upright;' : ''}
+          `;
         }
         
-        // Apply margin for line spacing
-        if (element.tagName === 'DIV') {
-          const marginStyle = settings.style === 'VERTICAL' ? 'margin-bottom: 16px;' : 'margin-bottom: 8px;';
-          element.style.cssText = marginStyle + element.style.cssText;
+        // Text lines
+        if (element.tagName === 'DIV' && element.textContent && element.textContent.trim()) {
+          if (element.style.opacity || element.querySelector('div')) {
+            // Signature area
+            element.style.cssText = `
+              font-size: ${settings.fontSize * 0.7}px;
+              opacity: 0.7;
+              margin-top: ${settings.style === 'VERTICAL' ? '0' : '60px'};
+              margin-left: ${settings.style === 'VERTICAL' ? '60px' : '0'};
+              ${settings.style === 'VERTICAL' ? 'writing-mode: vertical-rl; text-orientation: upright;' : ''}
+            `;
+          } else {
+            // Main content lines
+            const marginStyle = settings.style === 'VERTICAL' 
+              ? 'margin-right: 40px; margin-bottom: 0;' 
+              : 'margin-bottom: 20px; margin-right: 0;';
+            element.style.cssText = `
+              ${marginStyle}
+              ${settings.style === 'VERTICAL' ? 'writing-mode: vertical-rl; text-orientation: upright;' : ''}
+            `;
+          }
         }
       });
       
@@ -309,14 +330,38 @@ export default function ExportPage() {
                   color: settings.textColor,
                   fontSize: `${settings.fontSize / 4}px`,
                   lineHeight: settings.style === 'VERTICAL' ? '1.8' : '1.6',
-                  padding: '40px',
+                  padding: '20px',
                 }}
               >
-                <div className="text-center">
+                <div 
+                  className="text-center"
+                  style={{
+                    display: 'flex',
+                    flexDirection: settings.style === 'VERTICAL' ? 'row' : 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: settings.style === 'VERTICAL' ? '10px' : '5px',
+                  }}
+                >
                   {content && (
-                    <div className="mb-8">
+                    <div 
+                      style={{
+                        display: 'flex',
+                        flexDirection: settings.style === 'VERTICAL' ? 'row' : 'column',
+                        gap: settings.style === 'VERTICAL' ? '10px' : '5px',
+                        marginBottom: settings.style === 'VERTICAL' ? '0' : '20px',
+                        marginRight: settings.style === 'VERTICAL' ? '15px' : '0',
+                      }}
+                    >
                       {content.split('\n').map((line, index) => (
-                        <div key={index} className={settings.style === 'VERTICAL' ? 'mb-4' : 'mb-2'}>
+                        <div 
+                          key={index} 
+                          className={settings.style === 'VERTICAL' ? 'vertical-text' : ''}
+                          style={{
+                            writingMode: settings.style === 'VERTICAL' ? 'vertical-rl' : 'horizontal-tb',
+                            textOrientation: settings.style === 'VERTICAL' ? 'upright' : 'mixed',
+                          }}
+                        >
                           {line}
                         </div>
                       ))}
@@ -324,7 +369,15 @@ export default function ExportPage() {
                   )}
                   
                   {(authorName || showDate) && (
-                    <div className="text-sm opacity-70 mt-8">
+                    <div 
+                      className={settings.style === 'VERTICAL' ? 'vertical-text' : ''}
+                      style={{
+                        fontSize: `${settings.fontSize / 4 * 0.7}px`,
+                        opacity: 0.7,
+                        writingMode: settings.style === 'VERTICAL' ? 'vertical-rl' : 'horizontal-tb',
+                        textOrientation: settings.style === 'VERTICAL' ? 'upright' : 'mixed',
+                      }}
+                    >
                       {authorName && <div>{authorName}</div>}
                       {showDate && <div>{new Date().toLocaleDateString('ja-JP')}</div>}
                     </div>
