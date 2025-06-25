@@ -6,6 +6,7 @@ import html2canvas from 'html2canvas';
 
 type TankaStyle = 'VERTICAL' | 'HORIZONTAL';
 type FontFamily = 'mincho' | 'gothic';
+type ImageSize = 'X_CARD' | 'INSTAGRAM_STORY';
 
 interface TankaSettings {
   style: TankaStyle;
@@ -15,7 +16,13 @@ interface TankaSettings {
   textColor: string;
   width: number;
   height: number;
+  imageSize: ImageSize;
 }
+
+const IMAGE_SIZE_PRESETS = {
+  X_CARD: { width: 1200, height: 1600, name: 'X投稿用' },
+  INSTAGRAM_STORY: { width: 1080, height: 1920, name: 'Instagram Stories' },
+} as const;
 
 export default function ExportPage() {
   const [content, setContent] = useState('');
@@ -31,6 +38,7 @@ export default function ExportPage() {
     textColor: '#000000',
     width: 1200,
     height: 1600,
+    imageSize: 'X_CARD',
   });
 
   const previewRef = useRef<HTMLDivElement>(null);
@@ -188,6 +196,131 @@ export default function ExportPage() {
     window.open(xShareUrl, '_blank', 'noopener,noreferrer');
   };
 
+  const handleInstagramExport = async () => {
+    if (!content.trim()) return;
+
+    try {
+      // Generate Instagram Stories optimized image
+      const canvas = document.createElement('canvas');
+      canvas.width = 1080;
+      canvas.height = 1920;
+      const ctx = canvas.getContext('2d');
+      
+      if (!ctx) return;
+
+      // Fill background
+      ctx.fillStyle = settings.bgColor;
+      ctx.fillRect(0, 0, 1080, 1920);
+
+      // Set font properties for Instagram Stories
+      const fontFamily = settings.fontFamily === 'mincho' ? 'serif' : 'sans-serif';
+      const storyFontSize = Math.max(48, settings.fontSize * 1.5); // Larger font for stories
+      ctx.font = `${storyFontSize}px ${fontFamily}`;
+      ctx.fillStyle = settings.textColor;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+
+      if (settings.style === 'VERTICAL') {
+        await renderVerticalTextForStories(ctx, content, storyFontSize, settings);
+      } else {
+        await renderHorizontalTextForStories(ctx, content, storyFontSize, settings);
+      }
+
+      // Render author name and date if specified
+      if (authorName || showDate) {
+        ctx.font = `${Math.floor(storyFontSize * 0.6)}px ${fontFamily}`;
+        ctx.globalAlpha = 0.7;
+        
+        let infoY = 1920 - 120;
+        if (authorName) {
+          ctx.fillText(authorName, 540, infoY);
+          infoY += 40;
+        }
+        if (showDate) {
+          ctx.fillText(new Date().toLocaleDateString('ja-JP'), 540, infoY);
+        }
+        ctx.globalAlpha = 1;
+      }
+
+      // Convert to blob and create download
+      canvas.toBlob((blob) => {
+        if (!blob) return;
+        
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.download = `tanka_instagram_story_${Date.now()}.png`;
+        link.href = url;
+        link.click();
+        
+        // Clean up
+        URL.revokeObjectURL(url);
+        
+        // Try to open Instagram on mobile
+        if (navigator.userAgent.match(/iPhone|iPad|Android/i)) {
+          setTimeout(() => {
+            window.open('instagram://story-camera', '_self');
+          }, 1000);
+        }
+      }, 'image/png');
+      
+    } catch (error) {
+      console.error('Instagram export failed:', error);
+      alert('Instagram用画像のエクスポートに失敗しました');
+    }
+  };
+
+  const renderVerticalTextForStories = async (ctx: CanvasRenderingContext2D, text: string, fontSize: number, settings: TankaSettings) => {
+    const lines = text.split('\n').filter(line => line.trim());
+    const lineSpacing = fontSize * 1.8;
+    const charSpacing = fontSize * 1.2;
+    
+    // Calculate starting position (centered for Stories)
+    const totalWidth = lines.length * lineSpacing;
+    let currentX = (1080 + totalWidth) / 2 - lineSpacing / 2;
+    
+    for (const line of lines) {
+      let currentY = (1920 - line.length * charSpacing) / 2 + charSpacing / 2;
+      
+      for (const char of line) {
+        if (shouldRotateChar(char)) {
+          ctx.save();
+          ctx.translate(currentX, currentY);
+          ctx.rotate(Math.PI / 2);
+          ctx.fillText(char, 0, 0);
+          ctx.restore();
+        } else {
+          ctx.fillText(char, currentX, currentY);
+        }
+        currentY += charSpacing;
+      }
+      currentX -= lineSpacing;
+    }
+  };
+
+  const renderHorizontalTextForStories = async (ctx: CanvasRenderingContext2D, text: string, fontSize: number, settings: TankaSettings) => {
+    const lines = text.split('\n').filter(line => line.trim());
+    const lineHeight = fontSize * 1.6;
+    
+    // Calculate starting position (centered for Stories)
+    const totalHeight = lines.length * lineHeight;
+    let currentY = (1920 - totalHeight) / 2 + fontSize;
+    
+    for (const line of lines) {
+      ctx.fillText(line, 540, currentY); // 540 is center of 1080
+      currentY += lineHeight;
+    }
+  };
+
+  const handleImageSizeChange = (newSize: ImageSize) => {
+    const preset = IMAGE_SIZE_PRESETS[newSize];
+    setSettings(prev => ({
+      ...prev,
+      imageSize: newSize,
+      width: preset.width,
+      height: preset.height,
+    }));
+  };
+
   const contentLength = content.length;
   const isContentValid = contentLength > 0 && contentLength <= 40;
 
@@ -291,6 +424,34 @@ export default function ExportPage() {
                   </div>
                 </div>
 
+                {/* 画像サイズ */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <svg className="inline w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    画像サイズ
+                  </label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {Object.entries(IMAGE_SIZE_PRESETS).map(([key, preset]) => (
+                      <label key={key} className="flex items-center">
+                        <input
+                          type="radio"
+                          name="imageSize"
+                          value={key}
+                          checked={settings.imageSize === key}
+                          onChange={(e) => handleImageSizeChange(e.target.value as ImageSize)}
+                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                        />
+                        <span className="ml-2 text-sm text-gray-700">
+                          {preset.name}<br />
+                          <span className="text-xs text-gray-500">{preset.width}×{preset.height}</span>
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
                 {/* フォント */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -354,22 +515,36 @@ export default function ExportPage() {
             {/* エクスポートボタン */}
             <div className="mt-8 pt-6 border-t border-gray-200">
               <h3 className="text-lg font-medium mb-4">エクスポート</h3>
-              <div className="flex space-x-4">
+              <div className="space-y-4">
+                <div className="flex space-x-4">
+                  <button
+                    onClick={() => handleExport('png')}
+                    disabled={!isContentValid}
+                    className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                  >
+                    <Download className="w-4 h-4 mr-2" />
+                    PNG形式
+                  </button>
+                  <button
+                    onClick={() => handleExport('jpeg')}
+                    disabled={!isContentValid}
+                    className="flex items-center px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                  >
+                    <Download className="w-4 h-4 mr-2" />
+                    JPEG形式
+                  </button>
+                </div>
+                
+                {/* Instagram Stories エクスポート */}
                 <button
-                  onClick={() => handleExport('png')}
+                  onClick={handleInstagramExport}
                   disabled={!isContentValid}
-                  className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                  className="flex items-center px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-md hover:from-purple-600 hover:to-pink-600 disabled:bg-gray-400 disabled:cursor-not-allowed"
                 >
-                  <Download className="w-4 h-4 mr-2" />
-                  PNG形式
-                </button>
-                <button
-                  onClick={() => handleExport('jpeg')}
-                  disabled={!isContentValid}
-                  className="flex items-center px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
-                >
-                  <Download className="w-4 h-4 mr-2" />
-                  JPEG形式
+                  <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                  </svg>
+                  Instagram Storiesで投稿
                 </button>
               </div>
             </div>
