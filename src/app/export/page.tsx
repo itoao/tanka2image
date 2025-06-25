@@ -34,86 +34,53 @@ export default function ExportPage() {
   const previewRef = useRef<HTMLDivElement>(null);
 
   const handleExport = async (format: 'png' | 'jpeg') => {
-    if (!previewRef.current) return;
+    if (!content.trim()) return;
 
     try {
-      // Create a temporary element with simplified styles for html2canvas
-      const tempElement = previewRef.current.cloneNode(true) as HTMLElement;
+      // Create canvas directly for better control over vertical text rendering
+      const canvas = document.createElement('canvas');
+      canvas.width = settings.width;
+      canvas.height = settings.height;
+      const ctx = canvas.getContext('2d');
       
-      // Remove problematic Tailwind classes and apply inline styles
-      tempElement.className = '';
-      tempElement.style.cssText = `
-        width: ${settings.width}px;
-        height: ${settings.height}px;
-        background-color: ${settings.bgColor};
-        color: ${settings.textColor};
-        font-size: ${settings.fontSize}px;
-        font-family: ${settings.fontFamily === 'mincho' ? 'serif' : 'sans-serif'};
-        line-height: ${settings.style === 'VERTICAL' ? '1.8' : '1.6'};
-        padding: 80px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        box-sizing: border-box;
-        ${settings.style === 'VERTICAL' ? 'writing-mode: vertical-rl; text-orientation: upright;' : ''}
-      `;
-      
-      // Clean up child elements
-      const children = tempElement.querySelectorAll('*');
-      children.forEach(child => {
-        const element = child as HTMLElement;
-        element.className = '';
+      if (!ctx) return;
+
+      // Fill background
+      ctx.fillStyle = settings.bgColor;
+      ctx.fillRect(0, 0, settings.width, settings.height);
+
+      // Set font properties
+      const fontFamily = settings.fontFamily === 'mincho' ? 'serif' : 'sans-serif';
+      ctx.font = `${settings.fontSize}px ${fontFamily}`;
+      ctx.fillStyle = settings.textColor;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+
+      if (settings.style === 'VERTICAL') {
+        // Vertical text rendering with proper character positioning
+        await renderVerticalText(ctx, content, settings);
+      } else {
+        // Horizontal text rendering
+        await renderHorizontalText(ctx, content, settings);
+      }
+
+      // Render author name and date if specified
+      if (authorName || showDate) {
+        ctx.font = `${Math.floor(settings.fontSize * 0.6)}px ${fontFamily}`;
+        ctx.globalAlpha = 0.7;
         
-        // Main content container
-        if (element.querySelector('div') && !element.classList.contains('signature')) {
-          element.style.cssText = `
-            text-align: center;
-            ${settings.style === 'VERTICAL' ? 'writing-mode: vertical-rl; text-orientation: upright;' : ''}
-          `;
+        let infoY = settings.height - 80;
+        if (authorName) {
+          ctx.fillText(authorName, settings.width / 2, infoY);
+          infoY += 30;
         }
-        
-        // Text lines
-        if (element.tagName === 'DIV' && element.textContent && element.textContent.trim()) {
-          if (element.style.opacity || element.querySelector('div')) {
-            // Signature area
-            element.style.cssText = `
-              font-size: ${settings.fontSize * 0.7}px;
-              opacity: 0.7;
-              margin-top: ${settings.style === 'VERTICAL' ? '0' : '60px'};
-              margin-left: ${settings.style === 'VERTICAL' ? '60px' : '0'};
-              ${settings.style === 'VERTICAL' ? 'writing-mode: vertical-rl; text-orientation: upright;' : ''}
-            `;
-          } else {
-            // Main content lines
-            const marginStyle = settings.style === 'VERTICAL' 
-              ? 'margin-right: 40px; margin-bottom: 0;' 
-              : 'margin-bottom: 20px; margin-right: 0;';
-            element.style.cssText = `
-              ${marginStyle}
-              ${settings.style === 'VERTICAL' ? 'writing-mode: vertical-rl; text-orientation: upright;' : ''}
-            `;
-          }
+        if (showDate) {
+          ctx.fillText(new Date().toLocaleDateString('ja-JP'), settings.width / 2, infoY);
         }
-      });
-      
-      // Temporarily add to document for rendering
-      tempElement.style.position = 'absolute';
-      tempElement.style.left = '-9999px';
-      tempElement.style.top = '-9999px';
-      document.body.appendChild(tempElement);
+        ctx.globalAlpha = 1;
+      }
 
-      const canvas = await html2canvas(tempElement, {
-        width: settings.width,
-        height: settings.height,
-        scale: 2,
-        backgroundColor: settings.bgColor,
-        useCORS: true,
-        allowTaint: true,
-      });
-
-      // Remove temporary element
-      document.body.removeChild(tempElement);
-
+      // Download the image
       const link = document.createElement('a');
       link.download = `tanka_${Date.now()}.${format}`;
       link.href = canvas.toDataURL(`image/${format}`, format === 'jpeg' ? 0.9 : undefined);
@@ -122,6 +89,55 @@ export default function ExportPage() {
       console.error('Export failed:', error);
       alert('画像のエクスポートに失敗しました');
     }
+  };
+
+  const renderVerticalText = async (ctx: CanvasRenderingContext2D, text: string, settings: TankaSettings) => {
+    const lines = text.split('\n').filter(line => line.trim());
+    const lineSpacing = settings.fontSize * 1.8;
+    const charSpacing = settings.fontSize * 1.2;
+    
+    // Calculate starting position (centered)
+    const totalWidth = lines.length * lineSpacing;
+    let currentX = (settings.width + totalWidth) / 2 - lineSpacing / 2;
+    
+    for (const line of lines) {
+      let currentY = (settings.height - line.length * charSpacing) / 2 + charSpacing / 2;
+      
+      for (const char of line) {
+        // Special handling for punctuation and long vowel marks
+        if (shouldRotateChar(char)) {
+          ctx.save();
+          ctx.translate(currentX, currentY);
+          ctx.rotate(Math.PI / 2);
+          ctx.fillText(char, 0, 0);
+          ctx.restore();
+        } else {
+          ctx.fillText(char, currentX, currentY);
+        }
+        currentY += charSpacing;
+      }
+      currentX -= lineSpacing;
+    }
+  };
+
+  const renderHorizontalText = async (ctx: CanvasRenderingContext2D, text: string, settings: TankaSettings) => {
+    const lines = text.split('\n').filter(line => line.trim());
+    const lineHeight = settings.fontSize * 1.6;
+    
+    // Calculate starting position (centered)
+    const totalHeight = lines.length * lineHeight;
+    let currentY = (settings.height - totalHeight) / 2 + settings.fontSize;
+    
+    for (const line of lines) {
+      ctx.fillText(line, settings.width / 2, currentY);
+      currentY += lineHeight;
+    }
+  };
+
+  const shouldRotateChar = (char: string): boolean => {
+    // Characters that should be rotated in vertical text
+    const rotateChars = ['ー', '。', '、', '！', '？', '：', '；', '（', '）', '「', '」', '『', '』'];
+    return rotateChars.includes(char);
   };
 
   const contentLength = content.length;
@@ -379,7 +395,14 @@ export default function ExportPage() {
                       }}
                     >
                       {authorName && <div>{authorName}</div>}
-                      {showDate && <div>{new Date().toLocaleDateString('ja-JP')}</div>}
+                      {showDate && (
+                        <div>
+                          {settings.style === 'VERTICAL' 
+                            ? new Date().toLocaleDateString('ja-JP').replace(/\//g, '・')
+                            : new Date().toLocaleDateString('ja-JP')
+                          }
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
