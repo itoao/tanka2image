@@ -620,20 +620,20 @@ export default function ExportPage() {
               <h3 className="text-lg font-medium mb-4">画像をダウンロード</h3>
               <div className="space-y-3">
                 <button
-                  onClick={() => handleExport('png')}
-                  disabled={!isContentValid}
-                  className="w-full flex items-center justify-center px-4 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                  onClick={() => {}}
+                  disabled={true}
+                  className="w-full flex items-center justify-center px-4 py-3 bg-gray-400 text-white rounded-md cursor-not-allowed"
                 >
                   <Download className="w-4 h-4 mr-2" />
-                  PNG形式でダウンロード
+                  PNG形式でダウンロード（実装中）
                 </button>
                 <button
-                  onClick={() => handleExport('jpeg')}
-                  disabled={!isContentValid}
-                  className="w-full flex items-center justify-center px-4 py-3 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                  onClick={() => {}}
+                  disabled={true}
+                  className="w-full flex items-center justify-center px-4 py-3 bg-gray-400 text-white rounded-md cursor-not-allowed"
                 >
                   <Download className="w-4 h-4 mr-2" />
-                  JPEG形式でダウンロード
+                  JPEG形式でダウンロード（実装中）
                 </button>
                 
                 <button
@@ -654,12 +654,12 @@ export default function ExportPage() {
               <h3 className="text-lg font-medium mb-4">SNSでシェア</h3>
               {!shareUrl ? (
                 <button
-                  onClick={handleShare}
-                  disabled={!isContentValid || isSharing}
-                  className="w-full flex items-center justify-center px-4 py-3 bg-black text-white rounded-md hover:bg-gray-800 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                  onClick={() => {}}
+                  disabled={true}
+                  className="w-full flex items-center justify-center px-4 py-3 bg-gray-400 text-white rounded-md cursor-not-allowed"
                 >
                   <Share2 className="w-4 h-4 mr-2" />
-                  {isSharing ? '共有URL生成中...' : '共有URLを生成'}
+                  共有URLを生成（実装中）
                 </button>
               ) : (
                 <div className="space-y-3">
@@ -1025,20 +1025,20 @@ export default function ExportPage() {
               <div className="space-y-4">
                 <div className="flex space-x-4">
                   <button
-                    onClick={() => handleExport('png')}
-                    disabled={!isContentValid}
-                    className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                    onClick={() => {}}
+                    disabled={true}
+                    className="flex items-center px-4 py-2 bg-gray-400 text-white rounded-md cursor-not-allowed"
                   >
                     <Download className="w-4 h-4 mr-2" />
-                    PNG形式
+                    PNG形式（実装中）
                   </button>
                   <button
-                    onClick={() => handleExport('jpeg')}
-                    disabled={!isContentValid}
-                    className="flex items-center px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                    onClick={() => {}}
+                    disabled={true}
+                    className="flex items-center px-4 py-2 bg-gray-400 text-white rounded-md cursor-not-allowed"
                   >
                     <Download className="w-4 h-4 mr-2" />
-                    JPEG形式
+                    JPEG形式（実装中）
                   </button>
                 </div>
                 
@@ -1061,12 +1061,12 @@ export default function ExportPage() {
               <h3 className="text-lg font-medium mb-4">Xでシェア</h3>
               {!shareUrl ? (
                 <button
-                  onClick={handleShare}
-                  disabled={!isContentValid || isSharing}
-                  className="flex items-center px-4 py-2 bg-black text-white rounded-md hover:bg-gray-800 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                  onClick={() => {}}
+                  disabled={true}
+                  className="flex items-center px-4 py-2 bg-gray-400 text-white rounded-md cursor-not-allowed"
                 >
                   <Share2 className="w-4 h-4 mr-2" />
-                  {isSharing ? '共有URL生成中...' : '共有URLを生成'}
+                  共有URLを生成（実装中）
                 </button>
               ) : (
                 <div className="space-y-3">
