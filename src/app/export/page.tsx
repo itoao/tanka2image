@@ -303,50 +303,6 @@ export default function ExportPage() {
       ctx.fillStyle = settings.bgColor;
       ctx.fillRect(0, 0, 1080, 1920);
 
-      // Draw link area at top-left (similar to Spotify/Apple Music)
-      if (shareUrl) {
-        // Background for link
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.85)';
-        const linkPadding = 30;
-        const linkHeight = 50;
-        const linkWidth = 220;
-        const borderRadius = 25;
-        
-        // Draw rounded rectangle (pill shape)
-        ctx.beginPath();
-        ctx.moveTo(linkPadding + borderRadius, linkPadding);
-        ctx.lineTo(linkPadding + linkWidth - borderRadius, linkPadding);
-        ctx.quadraticCurveTo(linkPadding + linkWidth, linkPadding, linkPadding + linkWidth, linkPadding + borderRadius);
-        ctx.lineTo(linkPadding + linkWidth, linkPadding + linkHeight - borderRadius);
-        ctx.quadraticCurveTo(linkPadding + linkWidth, linkPadding + linkHeight, linkPadding + linkWidth - borderRadius, linkPadding + linkHeight);
-        ctx.lineTo(linkPadding + borderRadius, linkPadding + linkHeight);
-        ctx.quadraticCurveTo(linkPadding, linkPadding + linkHeight, linkPadding, linkPadding + linkHeight - borderRadius);
-        ctx.lineTo(linkPadding, linkPadding + borderRadius);
-        ctx.quadraticCurveTo(linkPadding, linkPadding, linkPadding + borderRadius, linkPadding);
-        ctx.closePath();
-        ctx.fill();
-        
-        // Draw music note icon
-        ctx.save();
-        ctx.translate(linkPadding + 30, linkPadding + linkHeight / 2);
-        ctx.fillStyle = 'white';
-        
-        // Music note icon (♫)
-        ctx.font = '20px sans-serif';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText('♫', 0, 0);
-        
-        ctx.restore();
-        
-        // Link text
-        ctx.fillStyle = 'white';
-        ctx.font = 'bold 14px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
-        ctx.textAlign = 'left';
-        ctx.textBaseline = 'middle';
-        ctx.fillText('短歌を読む', linkPadding + 55, linkPadding + linkHeight / 2);
-      }
-
       // Set font properties for Instagram Stories
       const fontFamily = settings.fontFamily === 'mincho' ? 'serif' : 'sans-serif';
       const storyFontSize = Math.max(48, settings.fontSize * 1.5); // Larger font for stories
