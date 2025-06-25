@@ -13,3 +13,75 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tankas Tanka[]
+
+  @@map("users")
+}
+
+model Tanka {
+  id          String      @id @default(cuid())
+  content     String      @db.Text
+  lineBreaks  String?     @db.Text // JSON string for line break positions
+  style       TankaStyle? @default(VERTICAL)
+  fontFamily  String?     @default("mincho")
+  fontSize    Int?        @default(32)
+  bgColor     String      @default("#FFFFFF")
+  textColor   String      @default("#000000")
+  width       Int         @default(1200)
+  height      Int         @default(1600)
+  authorName  String?
+  showDate    Boolean     @default(true)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  images TankaImage[]
+  shares Share[]
+
+  @@index([userId])
+  @@index([createdAt])
+  @@map("tankas")
+}
+
+model TankaImage {
+  id        String   @id @default(cuid())
+  url       String
+  format    String   @default("png") // png or jpeg
+  createdAt DateTime @default(now())
+
+  tankaId String
+  tanka   Tanka  @relation(fields: [tankaId], references: [id], onDelete: Cascade)
+
+  @@index([tankaId])
+  @@map("tanka_images")
+}
+
+model Share {
+  id          String   @id @default(cuid())
+  shareUrl    String   @unique
+  ogpImageUrl String?
+  viewCount   Int      @default(0)
+  createdAt   DateTime @default(now())
+
+  tankaId String
+  tanka   Tanka  @relation(fields: [tankaId], references: [id], onDelete: Cascade)
+
+  @@index([tankaId])
+  @@index([shareUrl])
+  @@map("shares")
+}
+
+enum TankaStyle {
+  VERTICAL   // 縦書き
+  HORIZONTAL // 横書き
+}
