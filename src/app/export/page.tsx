@@ -173,7 +173,7 @@ export default function ExportPage() {
       
       for (const char of line) {
         // Special handling for punctuation and long vowel marks
-        if (shouldRotateChar(char)) {
+        if (shouldRotateChar(char, text)) {
           ctx.save();
           ctx.translate(currentX, currentY);
           ctx.rotate(Math.PI / 2);
@@ -202,8 +202,26 @@ export default function ExportPage() {
     }
   };
 
-  const shouldRotateChar = (char: string): boolean => {
-    // Characters that should be rotated in vertical text
+  const isEnglishText = (text: string): boolean => {
+    // Check if text contains primarily English characters
+    const englishChars = text.match(/[a-zA-Z]/g);
+    const japaneseChars = text.match(/[\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FAF]/g);
+    
+    if (!englishChars && !japaneseChars) return false;
+    if (!japaneseChars) return true;
+    if (!englishChars) return false;
+    
+    // If English characters are more than 50%, consider it English text
+    return englishChars.length > japaneseChars.length;
+  };
+
+  const shouldRotateChar = (char: string, text: string): boolean => {
+    // Don't rotate characters if the text is primarily English
+    if (isEnglishText(text)) {
+      return false;
+    }
+    
+    // Characters that should be rotated in vertical Japanese text
     const rotateChars = ['ー', '。', '、', '！', '？', '：', '；', '（', '）', '「', '」', '『', '』'];
     return rotateChars.includes(char);
   };
@@ -340,7 +358,7 @@ export default function ExportPage() {
       let currentY = (1920 - line.length * charSpacing) / 2 + charSpacing / 2;
       
       for (const char of line) {
-        if (shouldRotateChar(char)) {
+        if (shouldRotateChar(char, text)) {
           ctx.save();
           ctx.translate(currentX, currentY);
           ctx.rotate(Math.PI / 2);
