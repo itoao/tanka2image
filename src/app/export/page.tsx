@@ -148,11 +148,44 @@ export default function ExportPage() {
         ctx.globalAlpha = 1;
       }
 
-      // Download the image
-      const link = document.createElement('a');
-      link.download = `tanka_${Date.now()}.${format}`;
-      link.href = canvas.toDataURL(`image/${format}`, format === 'jpeg' ? 0.9 : undefined);
-      link.click();
+      // Convert to blob for better mobile support
+      canvas.toBlob((blob) => {
+        if (!blob) {
+          alert('画像の生成に失敗しました');
+          return;
+        }
+
+        // Check if we're on mobile
+        const isMobileDevice = /iPhone|iPad|Android/i.test(navigator.userAgent);
+        
+        if (isMobileDevice) {
+          // Mobile: Use direct blob URL approach
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.download = `tanka_${Date.now()}.${format}`;
+          link.href = url;
+          
+          // Force download on mobile
+          link.style.display = 'none';
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          
+          // Clean up
+          setTimeout(() => URL.revokeObjectURL(url), 1000);
+          
+          // Show success message for mobile users
+          alert('画像がダウンロードされました。ダウンロードフォルダを確認してください。');
+        } else {
+          // Desktop: Use traditional download approach
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.download = `tanka_${Date.now()}.${format}`;
+          link.href = url;
+          link.click();
+          URL.revokeObjectURL(url);
+        }
+      }, `image/${format}`, format === 'jpeg' ? 0.9 : undefined);
     } catch (error) {
       console.error('Export failed:', error);
       alert('画像のエクスポートに失敗しました');
