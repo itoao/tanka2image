@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import { Download, RotateCw, Palette, Type } from 'lucide-react';
+import { Download, RotateCw, Palette, Type, Share2, ExternalLink } from 'lucide-react';
 import html2canvas from 'html2canvas';
 
 type TankaStyle = 'VERTICAL' | 'HORIZONTAL';
@@ -21,6 +21,8 @@ export default function ExportPage() {
   const [content, setContent] = useState('');
   const [authorName, setAuthorName] = useState('');
   const [showDate, setShowDate] = useState(true);
+  const [shareUrl, setShareUrl] = useState<string | null>(null);
+  const [isSharing, setIsSharing] = useState(false);
   const [settings, setSettings] = useState<TankaSettings>({
     style: 'VERTICAL',
     fontFamily: 'mincho',
@@ -138,6 +140,52 @@ export default function ExportPage() {
     // Characters that should be rotated in vertical text
     const rotateChars = ['ー', '。', '、', '！', '？', '：', '；', '（', '）', '「', '」', '『', '』'];
     return rotateChars.includes(char);
+  };
+
+  const handleShare = async () => {
+    if (!content.trim()) return;
+
+    setIsSharing(true);
+    try {
+      const response = await fetch('/api/tanka', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          content,
+          authorName: authorName || null,
+          showDate,
+          style: settings.style,
+          fontFamily: settings.fontFamily,
+          fontSize: settings.fontSize,
+          bgColor: settings.bgColor,
+          textColor: settings.textColor,
+          width: settings.width,
+          height: settings.height,
+        }),
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        setShareUrl(data.shareUrl);
+      } else {
+        alert('共有URLの生成に失敗しました');
+      }
+    } catch (error) {
+      console.error('Share failed:', error);
+      alert('共有機能でエラーが発生しました');
+    } finally {
+      setIsSharing(false);
+    }
+  };
+
+  const handleXShare = () => {
+    if (!shareUrl) return;
+    const xShareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(
+      `短歌を画像にしました\n\n"${content}"\n\n`
+    )}&url=${encodeURIComponent(shareUrl)}`;
+    window.open(xShareUrl, '_blank', 'noopener,noreferrer');
   };
 
   const contentLength = content.length;
@@ -324,6 +372,61 @@ export default function ExportPage() {
                   JPEG形式
                 </button>
               </div>
+            </div>
+
+            {/* Xシェア機能 */}
+            <div className="mt-8 pt-6 border-t border-gray-200">
+              <h3 className="text-lg font-medium mb-4">Xでシェア</h3>
+              {!shareUrl ? (
+                <button
+                  onClick={handleShare}
+                  disabled={!isContentValid || isSharing}
+                  className="flex items-center px-4 py-2 bg-black text-white rounded-md hover:bg-gray-800 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                >
+                  <Share2 className="w-4 h-4 mr-2" />
+                  {isSharing ? '共有URL生成中...' : '共有URLを生成'}
+                </button>
+              ) : (
+                <div className="space-y-3">
+                  <button
+                    onClick={handleXShare}
+                    className="flex items-center px-4 py-2 bg-black text-white rounded-md hover:bg-gray-800"
+                  >
+                    <svg
+                      className="w-4 h-4 mr-2"
+                      fill="currentColor"
+                      viewBox="0 0 24 24"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                    </svg>
+                    Xでシェア
+                  </button>
+                  
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="text"
+                      value={shareUrl}
+                      readOnly
+                      className="flex-1 px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-sm"
+                    />
+                    <button
+                      onClick={() => navigator.clipboard.writeText(shareUrl)}
+                      className="px-3 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm"
+                    >
+                      コピー
+                    </button>
+                    <a
+                      href={shareUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-3 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 text-sm"
+                    >
+                      <ExternalLink className="w-4 h-4" />
+                    </a>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
