@@ -37,7 +37,7 @@ const STEPS: { key: Step; title: string; description: string }[] = [
 export default function ExportPage() {
   const [content, setContent] = useState('');
   const [authorName, setAuthorName] = useState('');
-  const [showDate, setShowDate] = useState(true);
+  const [showDate, setShowDate] = useState(false);
   const [shareUrl, setShareUrl] = useState<string | null>(null);
   const [isSharing, setIsSharing] = useState(false);
   const [currentStep, setCurrentStep] = useState<Step>('content');
