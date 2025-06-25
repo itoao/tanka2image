@@ -6,7 +6,8 @@ import { NextRequest, NextResponse } from 'next/server';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { content } = body;\n    console.log('Received content:', content); // Temporary to avoid unused variable warning
+    const { content } = body;
+    console.log('Received content:', content); // Temporary to avoid unused variable warning
 
     // TODO: Implement database functionality
     // const tanka = await prisma.tanka.create({
