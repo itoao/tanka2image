@@ -17,7 +17,7 @@ const notoSerifJP = Noto_Serif_JP({
 });
 
 export const metadata: Metadata = {
-  title: "短歌2画像 | 短歌を美しい画像に変換",
+  title: "tanka2image",
   description: "短歌を入力して縦長の美しい画像に変換・エクスポートできるアプリ。SNSでのシェアに最適。",
 };
 

@@ -693,7 +693,7 @@ export default function ExportPage() {
         {/* Header */}
         <div className="bg-white shadow-sm px-4 py-3 sticky top-0 z-10">
           <div className="text-center">
-            <h1 className="text-xl font-bold text-gray-900">短歌2画像</h1>
+            <h1 className="text-xl font-bold text-gray-900">tanka2image</h1>
             <p className="text-sm text-gray-600">{STEPS.find(s => s.key === currentStep)?.description}</p>
           </div>
           
@@ -803,7 +803,7 @@ export default function ExportPage() {
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">短歌2画像</h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">tanka2image</h1>
           <p className="text-gray-600">短歌を美しい画像に変換してエクスポート</p>
         </div>
 
