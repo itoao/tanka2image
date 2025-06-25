@@ -43,6 +43,7 @@ OGP画像には生成した短歌画像を使う。
 日本語フォントのライセンスに注意。
 
 📂 技術スタック候補
+- pnpm
 フロントエンド: Next.js / Nuxt.js / React / Vue など
 
 画像生成: HTML to Canvas (html2canvas) / SVG / canvas API
