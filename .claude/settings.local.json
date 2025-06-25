@@ -1,12 +1,7 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npm install:*)",
-      "Bash(pnpm add:*)",
-      "Bash(mkdir:*)",
-      "Bash(pnpm run:*)",
-      "Bash(git add:*)",
-      "Bash(git commit:*)"
+      "Bash(git restore:*)"
     ],
     "deny": []
   }
