@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '../../../../generated/prisma';
+// import { PrismaClient } from '@prisma/client';
 
-const prisma = new PrismaClient();
+// const prisma = new PrismaClient();
 
 export async function GET(
   request: NextRequest,
@@ -11,27 +11,21 @@ export async function GET(
     const params = await context.params;
     const { id } = params;
 
-    // Fetch tanka data
-    const tanka = await prisma.tanka.findUnique({
-      where: { id },
-    });
+    // TODO: Implement database functionality
+    // const tanka = await prisma.tanka.findUnique({
+    //   where: { id },
+    // });
 
-    if (!tanka) {
-      return new NextResponse('Tanka not found', { status: 404 });
-    }
+    // if (!tanka) {
+    //   return new NextResponse('Tanka not found', { status: 404 });
+    // }
 
-    // Generate OGP image using Canvas API (same logic as export function)
-    const canvas = await generateTankaImage(tanka);
-    
-    // Convert canvas to buffer
-    const buffer = canvas.toBuffer('image/png');
+    // TODO: Generate OGP image using Canvas API
+    // const canvas = await generateTankaImage(tanka);
+    // const buffer = canvas.toBuffer('image/png');
 
-    return new NextResponse(buffer, {
-      headers: {
-        'Content-Type': 'image/png',
-        'Cache-Control': 'public, max-age=31536000, immutable',
-      },
-    });
+    // Temporary placeholder response
+    return new NextResponse('OGP image generation not available', { status: 503 });
   } catch (error) {
     console.error('Error generating OGP image:', error);
     return new NextResponse('Internal Server Error', { status: 500 });
